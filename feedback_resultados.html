@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Feedback</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            width: 90%;
+            max-width: 1200px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        .rating {
+            color: gold;
+        }
+
+        .no-feedback {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .filters select {
+            padding: 8px;
+            font-size: 16px;
+        }
+
+        .average-rating {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .delete-btn:hover {
+            background-color: #e53935;
+        }
+
+        .logout-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 20px;
+            text-align: center;
+            display: block;
+            width: 100%;
+        }
+
+        .logout-btn:hover {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <h2>Dashboard de Feedback por Setor</h2>
+
+        <!-- Filtros -->
+        <div class="filters">
+            <div>
+                <label for="filterSetor">Filtrar por Setor:</label>
+                <select id="filterSetor">
+                    <option value="todos">Todos os Setores</option>
+                    <option value="mercearia">Mercearia</option>
+                    <option value="hortifruti">Hortifruti</option>
+                    <option value="acougue">Açougue</option>
+                    <option value="padaria">Padaria</option>
+                    <option value="caixa">Caixa</option>
+                </select>
+            </div>
+            <div>
+                <label for="filterPeriodo">Filtrar por Período:</label>
+                <select id="filterPeriodo">
+                    <option value="todos">Todo o Tempo</option>
+                    <option value="1dia">Último Dia</option>
+                    <option value="7dias">Últimos 7 Dias</option>
+                    <option value="30dias">Últimos 30 Dias</option>
+                    <option value="6meses">Últimos 6 Meses</option>
+                    <option value="1ano">Último Ano</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tabela de Feedbacks -->
+        <table id="dashboardTable">
+            <thead>
+                <tr>
+                    <th>Setor</th>
+                    <th>Data</th>
+                    <th>Comentário</th>
+                    <th>Avaliação</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody id="dashboardBody">
+                <tr class="no-feedback">
+                    <td colspan="5">Nenhum feedback disponível</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Exibição da Média de Estrelas -->
+        <div class="average-rating" id="averageRating">Média de Estrelas: 0.00</div>
+
+        <!-- Botão de Logout -->
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        // Função para carregar feedbacks do LocalStorage
+        function loadFeedbacks(setor = 'todos', periodo = 'todos') {
+            const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
+            const dashboardBody = document.getElementById('dashboardBody');
+            const averageRatingDiv = document.getElementById('averageRating');
+            let totalRating = 0;
+            let feedbackCount = 0;
+
+            // Limpa a tabela
+            dashboardBody.innerHTML = '';
+
+            // Filtrar feedbacks por setor
+            let filteredFeedbacks = setor === 'todos' ? feedbacks : feedbacks.filter(feedback => feedback.sector === setor);
+
+            // Filtrar feedbacks por período
+            filteredFeedbacks = filterByPeriod(filteredFeedbacks, periodo);
+
+            if (filteredFeedbacks.length === 0) {
+                dashboardBody.innerHTML = `<tr class="no-feedback"><td colspan="5">Nenhum feedback disponível</td></tr>`;
+                averageRatingDiv.textContent = 'Média de Estrelas: 0.00';
+                return;
+            }
+
+            // Inserir feedbacks filtrados na tabela
+            filteredFeedbacks.forEach((feedback, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${capitalize(feedback.sector)}</td>
+                    <td>${feedback.timestamp}</td>
+                    <td>${feedback.comments || 'Sem comentário'}</td>
+                    <td><span class="rating">${'★'.repeat(feedback.rating)}</span></td>
+                    <td><button class="delete-btn" onclick="deleteFeedback(${index})">Excluir</button></td>
+                `;
+                dashboardBody.appendChild(row);
+
+                // Certificar-se de que o valor da avaliação seja numérico
+                const rating = parseFloat(feedback.rating);
+                if (!isNaN(rating)) {
+                    totalRating += rating;
+                    feedbackCount++;
+                }
+            });
+
+            // Calcular a média de estrelas (total de estrelas dividido pelo número de feedbacks)
+            const averageRating = feedbackCount > 0 ? (totalRating / feedbackCount).toFixed(2) : 0;
+            averageRatingDiv.textContent = `Média de Estrelas: ${averageRating}`;
+        }
+
+        // Função para filtrar feedbacks por período de tempo
+        function filterByPeriod(feedbacks, periodo) {
+            const now = new Date();
+            return feedbacks.filter(feedback => {
+                // Converter data em formato reconhecível
+                const feedbackDate = new Date(feedback.timestamp.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'));
+
+                switch (periodo) {
+                    case '1dia':
+                        return (now - feedbackDate) <= 24 * 60 * 60 * 1000; // 1 dia em milissegundos
+                    case '7dias':
+                        return (now - feedbackDate) <= 7 * 24 * 60 * 60 * 1000; // 7 dias
+                    case '30dias':
+                        return (now - feedbackDate) <= 30 * 24 * 60 * 60 * 1000; // 30 dias
+                    case '6meses':
+                        return (now - feedbackDate) <= 6 * 30 * 24 * 60 * 60 * 1000; // 6 meses (aproximado)
+                    case '1ano':
+                        return (now - feedbackDate) <= 365 * 24 * 60 * 60 * 1000; // 1 ano
+                    default:
+                        return true; // 'todos'
+                }
+            });
+        }
+
+        // Função para deletar feedback por índice
+        function deleteFeedback(index) {
+            let feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
+            feedbacks.splice(index, 1);  // Remove o feedback com base no índice
+            localStorage.setItem('feedbacks', JSON.stringify(feedbacks));  // Atualiza o localStorage
+            loadFeedbacks();  // Recarrega a tabela após a exclusão
+        }
+
+        // Função para capitalizar o nome do setor
+        function capitalize(text) {
+            return text.charAt(0).toUpperCase() + text.slice(1);
+        }
+
+        // Função de logout para redirecionar para login.html
+        function logout() {
+            window.location.href = "login.html";  // Redireciona para a página de login
+        }
+
+        // Carregar os feedbacks ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar feedbacks inicialmente
+            loadFeedbacks();
+
+            // Adicionar eventos para os filtros
+            const filterSetor = document.getElementById('filterSetor');
+            const filterPeriodo = document.getElementById('filterPeriodo');
+
+            // Atualizar quando o setor ou período mudar
+            filterSetor.addEventListener('change', function() {
+                loadFeedbacks(this.value, filterPeriodo.value);
+            });
+            filterPeriodo.addEventListener('change', function() {
+                loadFeedbacks(filterSetor.value, this.value);
+            });
+        });
+    </script>
+    
+</body>
+</html>

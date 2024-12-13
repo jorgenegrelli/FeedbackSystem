@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        .login-container h2 {
+            margin-bottom: 20px;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .login-container button:hover {
+            background-color: #0056b3;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Login</h2>
+
+        <!-- Botão para Cliente que não exige senha -->
+        <button onclick="location.href='index.html'">Sou Cliente</button>
+
+        <!-- Formulário de Login para Administrador -->
+        <form id="adminForm" onsubmit="return loginAdmin()">
+            <input type="text" id="adminUser" placeholder="Usuário" required><br>
+            <input type="password" id="adminPass" placeholder="Senha" required><br>
+            <button type="submit">Login de Administrador</button>
+        </form>
+
+    </div>
+
+    <script>
+        // Função para validar o login de administrador
+        function loginAdmin() {
+            var username = document.getElementById("adminUser").value;
+            var password = document.getElementById("adminPass").value;
+
+            if (username === "admin" && password === "admin") {
+                alert("Login bem-sucedido! Redirecionando...");
+
+                window.location.href = "feedback_resultados.html";
+                return false; 
+            } else {
+                alert("Usuário ou senha incorretos!");
+                return false;
+            }
+        }
+    </script>
+
+</body>
+</html>

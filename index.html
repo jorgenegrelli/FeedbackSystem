@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Feedback</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Logo da empresa -->
+        <img src="Logo Negrelli Preta.png" alt="Logo do Supermercado" class="logo">
+
+        <!-- Tela de Feedback -->
+        <div id="feedbackContainer">
+            <h1>Deixe seu Feedback</h1>
+            <form id="feedbackForm">
+                <label for="sector">Selecione o Setor:</label>
+                <select id="sector" required>
+                    <option value="mercearia">Mercearia</option>
+                    <option value="hortifruti">Hortifrúti</option>
+                    <option value="acougue">Açougue</option>
+                    <option value="padaria">Padaria</option>
+                    <option value="caixa">Caixa</option>
+                </select>
+
+                <label for="rating">Avaliação:</label>
+                <div class="stars">
+                    <span class="star" data-value="1">&#9733;</span>
+                    <span class="star" data-value="2">&#9733;</span>
+                    <span class="star" data-value="3">&#9733;</span>
+                    <span class="star" data-value="4">&#9733;</span>
+                    <span class="star" data-value="5">&#9733;</span>
+                </div>
+
+                <label for="comments">Comentário (opcional):</label>
+                <textarea id="comments" rows="4" placeholder="Escreva seu comentário aqui..."></textarea>
+
+                <button type="submit">Enviar Feedback</button>
+            </form>
+
+            <div id="thankYouMessage" style="display:none;">
+                <h2>Obrigado pelo seu feedback!</h2>
+            </div>
+        </div>
+
+        <!-- Botão de Logout -->
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="logout()" style="background-color: #f44336; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Logout</button>
+        </div>
+    </div>
+
+    <!-- Vinculando o arquivo script.js -->
+    <script src="script.js"></script>
+</body>
+</html>
